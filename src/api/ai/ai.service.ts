@@ -11,24 +11,21 @@ export async function generateImage({ mode, prompt, imageBase64 }: GenerateImage
   try {
     const model = "stabilityai/stable-diffusion-xl-base-1.0";
 
-    let payload: any = { inputs: prompt };
+    let payload: Record<string, unknown> = { inputs: prompt };
 
-    // img2img (con data URI)
     if (mode === "img2img" && imageBase64) {
-      payload = {
-        inputs: prompt,
-        image: imageBase64,
-      };
+      payload = { inputs: prompt, image: imageBase64 };
     }
 
-    const response = await hf.post(`/${model}`, payload, {
+    const response = await hf.post<unknown>(`/${model}`, payload, {
       responseType: "arraybuffer",
-      headers: {
-        Accept: "image/png", // 🔥 esta línea soluciona el error
-      },
+      headers: { Accept: "image/png" },
     });
 
-    const base64 = Buffer.from(response.data, "binary").toString("base64");
+    // 👇 Cast explícito para que Buffer lo acepte
+    const data = response.data as ArrayBuffer;
+    const buffer = Buffer.from(data);
+    const base64 = buffer.toString("base64");
     const imageUrl = `data:image/png;base64,${base64}`;
 
     logger.info("✅ Imagen generada con Hugging Face");
