@@ -9,15 +9,15 @@ dotenv.config();
 
 const app = express();
 
-// 🔹 Middlewares globales
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(rateLimiter);
-
-// 🔹 Rutas principales
 app.use("/api", routes);
 
-// 🔹 Manejador global de errores
+app.get("/api/ping", (_req: any, res: { json: (arg0: { status: string; message: string; }) => void; }) => {
+  res.json({ status: "ok", message: "🚀 Backend FNC IA activo en Vercel" });
+});
+
 app.use(errorHandler);
 
 export default app;
